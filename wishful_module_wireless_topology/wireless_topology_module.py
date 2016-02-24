@@ -20,7 +20,7 @@ class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
         self.log = logging.getLogger('wireless_topology_module.main')
 
     @wishful_controller.bind_function(upis.global_upi.estimate_nodes_in_carrier_sensing_range)
-    def estimate_nodes_in_carrier_sensing_range(self, nodes, iface, channel, TAU):
+    def estimate_nodes_in_carrier_sensing_range(self, nodes, iface, **kwargs):
         """
         Test to find out whether two nodes in the network are in carrier sensing range using UPIs.
         For a network with N nodes all combinations are evaluated, i.e. N over 2.
@@ -29,6 +29,8 @@ class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
         """
 
         self.log.debug("is_in_carrier_sensing_range for nodes: %s" % str(nodes))
+
+        TAU = kwargs.get('TAU')
 
         if (len(nodes) < 2):
             self.log.error('For this test we need at least two nodes.')
@@ -44,18 +46,23 @@ class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
             node2 = nodes[subgroup[1]]
 
             # exec experiment for each pair of nodes
-            isInCs = self.is_in_carrier_sensing_range(node1, node2, iface, TAU, channel)
+            isInCs = self.is_in_carrier_sensing_range(node1, node2, iface, TAU=TAU)
             res.append([node1,node2,isInCs])
 
         return res
 
 
     @wishful_controller.bind_function(upis.global_upi.is_in_carrier_sensing_range)
-    def is_in_carrier_sensing_range(self, node1, node2, mon_dev='mon2', TAU=0.9, rfCh=52):
+    def is_in_carrier_sensing_range(self, node1, node2, mon_dev, **kwargs):
         """
-        Helper functions to find out whether two nodes are in carrier sensing range using UPIs.
+        Helper functions to find out whether two nodes are in carrier sensing range or not.
+        The following algorithm is used here. The maximum transmit rate of each node is compared to the
+        transmission rate which can be achieved by both nodes if they transmit at the same time. If this
+        rate is lower than some threshold it is assumed that the nodes can sense each other.
         @return True if nodes are in carrier sensing range
         """
+
+        TAU = kwargs.get('TAU')
 
         nodes = []
         nodes.append(node1)
@@ -88,24 +95,8 @@ class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
                     isInCs['res'] = False
 
         try:
-            # Set channel is currently disabled, it is not needed because
-            # we automatically set the channel when we start the initial
-            # experiment scripts for each participating node.
-            #
-            # self.log.debug('(1) set both nodes on the same channel.')
-            # UPI_G call: exec remote function on UPI_R/N in 3 seconds
-            # UPIfunc = UPI_RN.setParameterLowerLayer
-            # remote function args
-            # UPIargs = {'KEY' : (UPI_RN.IEEE80211_CHANNEL, mon_dev), 'VALUE' : (rfCh,)}
-
-            # exec_time = None
-            # rvalue = self._upi_g.runAt(nodes, UPIfunc, UPIargs, exec_time)
-            # self.log.debug('Setting channel: %s' % str(rvalue))
-
-            # time.sleep(1)
-
             self.log.debug('(2) single flow at %s' % str(node1))
-            rv = self.controller.nodes(node1).blocking(True).net.gen_backlogged_80211_l2_bcast_traffic(mon_dev, 1000, 1350, 12, "1.1.1.1", "2.2.2.2", True)
+            rv = self.controller.nodes(node1).blocking(True).net.gen_backlogged_layer2_traffic(mon_dev, 1000, 1350, 12, ipdst="1.1.1.1", ipsrc="2.2.2.2", use_tcpreplay=True)
 
             peer_node = node1
             single_tx_rate_stats[peer_node] = rv
@@ -113,7 +104,7 @@ class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
             time.sleep(1)
 
             self.log.debug('(3) single flow at %s' % str(node2))
-            rv = self.controller.nodes(node2).blocking(True).net.gen_backlogged_80211_l2_bcast_traffic(mon_dev, 1000, 1350, 12, "1.1.1.1", "2.2.2.2", True)
+            rv = self.controller.nodes(node2).blocking(True).net.gen_backlogged_layer2_traffic(mon_dev, 1000, 1350, 12, ipdst="1.1.1.1", ipsrc="2.2.2.2", use_tcpreplay=True)
 
             peer_node = node2
             single_tx_rate_stats[peer_node] = rv
@@ -124,7 +115,7 @@ class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
 
             self.log.debug('(4) two flows at same time %s' % str(nodes))
             exec_time = datetime.datetime.now() + datetime.timedelta(seconds=3)
-            rv = self.controller.exec_time(exec_time).callback(csResultCollector).node(nodes).net.gen_backlogged_80211_l2_bcast_traffic(mon_dev, 1000, 1350, 12, "1.1.1.1", "2.2.2.2", True)
+            rv = self.controller.exec_time(exec_time).callback(csResultCollector).node(nodes).net.gen_backlogged_layer2_traffic(mon_dev, 1000, 1350, 12, ipdst="1.1.1.1", ipsrc="2.2.2.2", use_tcpreplay=True)
 
             while len(isInCs)==0:
                 self.log.debug('waiting for results ...')
@@ -136,7 +127,7 @@ class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
         return isInCs['res']
 
     @wishful_controller.bind_function(upis.global_upi.estimate_nodes_in_communication_range)
-    def estimate_nodes_in_communication_range(self, nodes, iface, channel, MINPDR):
+    def estimate_nodes_in_communication_range(self, nodes, iface, **kwargs):
         """
         Test to find out whether two nodes in the network are in communication range using UPIs.
         For a network with N nodes all combinations are evaluated, i.e. N over 2.
@@ -145,6 +136,8 @@ class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
         """
 
         self.log.info('Nodes to tested for comm. range %s' % str(nodes))
+
+        MINPDR = kwargs.get('MINPDR')
 
         if (len(nodes) < 2):
             self.log.error('For this test we need at least two nodes.')
@@ -160,18 +153,19 @@ class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
             node2 = nodes[subgroup[1]]
 
             # exec experiment for each pair of nodes
-            isInComm = self.is_in_communication_range(node1, node2, iface, MINPDR, channel)
+            isInComm = self.is_in_communication_range(node1, node2, iface, MINPDR=MINPDR)
             res.append([node1,node2,isInComm])
 
         return res
 
     @wishful_controller.bind_function(upis.global_upi.is_in_communication_range)
-    def is_in_communication_range(self, node1, node2, mon_dev='mon2', MINPDR=0.9, rfCh=52):
+    def is_in_communication_range(self, node1, node2, mon_dev, **kwargs):
 
         """
         Helper functions to find out whether two nodes are in communication range using UPIs.
         @return True if nodes are in communication range
         """
+        MINPDR = kwargs.get('MINPDR')
 
         nodes = []
         nodes.append(node1)
@@ -196,29 +190,13 @@ class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
                 rxPkts['res'] = int(messagedata)
 
         try:
-            # Set channel is currently disabled, it is not needed because
-            # we automatically set the channel when we start the initial
-            # experiment scripts for each participating node.
-            #
-            # self.log.debug('(1) set both nodes on the same channel.')
-            # UPI_G call: exec remote function on UPI_R/N in 3 seconds
-            # UPIfunc = UPI_RN.setParameterLowerLayer
-            # remote function args
-            # UPIargs = ...
-
-            # exec_time = None
-            # rvalue = self._upi_g.runAt(nodes, UPIfunc, UPIargs, exec_time)
-            # self.log.debug('Setting channel: %s' % str(rvalue))
-
-            # time.sleep(1)
-
             self.log.debug('(2) sniff traffic at %s' % str(node1))
             exec_time = datetime.datetime.now() + datetime.timedelta(seconds=2)
-            rv = self.controller.exec_time(exec_time).callback(csResultCollector).node(node1).net.sniff_80211_l2_link_probing(mon_dev, "1.1.1.1", "2.2.2.2", 5)
+            rv = self.controller.exec_time(exec_time).callback(csResultCollector).node(node1).net.sniff_layer2_traffic(mon_dev, ipdst="1.1.1.1", ipsrc="2.2.2.2", 5)
 
             self.log.debug('(2) gen traffic at %s' % str(node2))
             exec_time = datetime.datetime.now() + datetime.timedelta(seconds=3)
-            rv = self.controller.exec_time(exec_time).node(node2).net.gen_80211_l2_link_probing(mon_dev, 255, 0.01, "1.1.1.1", "2.2.2.2")
+            rv = self.controller.exec_time(exec_time).node(node2).net.gen_layer2_traffic(mon_dev, 255, 0.01, ipdst="1.1.1.1", ipsrc="2.2.2.2")
 
             while len(rxPkts)==0:
                 self.log.debug('commrange waiting for results ...')
