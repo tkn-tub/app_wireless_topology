@@ -96,7 +96,7 @@ class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
 
         try:
             self.log.debug('(2) single flow at %s' % str(node1))
-            rv = self.controller.nodes(node1).blocking(True).net.gen_backlogged_layer2_traffic(mon_dev, 1000, 12, ipPayloadSize=1350, ipdst="1.1.1.1", ipsrc="2.2.2.2", use_tcpreplay=True)
+            rv = self.controller.nodes(node1).blocking(True).net.gen_layer2_traffic(mon_dev, 1000, None, 12, ipPayloadSize=1350, ipdst="1.1.1.1", ipsrc="2.2.2.2", use_tcpreplay=True)
 
             peer_node = node1
             single_tx_rate_stats[peer_node] = rv
@@ -104,7 +104,7 @@ class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
             time.sleep(1)
 
             self.log.debug('(3) single flow at %s' % str(node2))
-            rv = self.controller.nodes(node2).blocking(True).net.gen_backlogged_layer2_traffic(mon_dev, 1000, 12, ipPayloadSize=1350, ipdst="1.1.1.1", ipsrc="2.2.2.2", use_tcpreplay=True)
+            rv = self.controller.nodes(node2).blocking(True).net.gen_layer2_traffic(mon_dev, 1000, None, 12, ipPayloadSize=1350, ipdst="1.1.1.1", ipsrc="2.2.2.2", use_tcpreplay=True)
 
             peer_node = node2
             single_tx_rate_stats[peer_node] = rv
@@ -192,7 +192,7 @@ class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
         try:
             self.log.debug('(2) sniff traffic at %s' % str(node1))
             exec_time = datetime.datetime.now() + datetime.timedelta(seconds=2)
-            rv = self.controller.exec_time(exec_time).callback(csResultCollector).node(node1).net.sniff_layer2_traffic(mon_dev, ipdst="1.1.1.1", ipsrc="2.2.2.2", 5)
+            rv = self.controller.exec_time(exec_time).callback(csResultCollector).node(node1).net.sniff_layer2_traffic(mon_dev, 5, ipdst="1.1.1.1", ipsrc="2.2.2.2")
 
             self.log.debug('(2) gen traffic at %s' % str(node2))
             exec_time = datetime.datetime.now() + datetime.timedelta(seconds=3)
