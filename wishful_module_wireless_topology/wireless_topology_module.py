@@ -19,7 +19,7 @@ class WirelessTopologyModule(wishful_controller.ControllerModule):
         super(WirelessTopologyModule, self).__init__(controller)
         self.log = logging.getLogger('wireless_topology_module.main')
 
-    @wishful_controller.bind_function(upis.global_upi.estimate_nodes_in_carrier_sensing_range)
+    @wishful_controller.bind_function(upis.net_func.estimate_nodes_in_carrier_sensing_range)
     def estimate_nodes_in_carrier_sensing_range(self, nodes, iface, **kwargs):
         """
         Test to find out whether two nodes in the network are in carrier sensing range using UPIs.
@@ -52,7 +52,7 @@ class WirelessTopologyModule(wishful_controller.ControllerModule):
         return res
 
 
-    @wishful_controller.bind_function(upis.global_upi.is_in_carrier_sensing_range)
+    @wishful_controller.bind_function(upis.net_func.is_in_carrier_sensing_range)
     def is_in_carrier_sensing_range(self, node1, node2, mon_dev, **kwargs):
         """
         Helper functions to find out whether two nodes are in carrier sensing range or not.
@@ -126,7 +126,7 @@ class WirelessTopologyModule(wishful_controller.ControllerModule):
 
         return isInCs['res']
 
-    @wishful_controller.bind_function(upis.global_upi.estimate_nodes_in_communication_range)
+    @wishful_controller.bind_function(upis.net_func.estimate_nodes_in_communication_range)
     def estimate_nodes_in_communication_range(self, nodes, iface, **kwargs):
         """
         Test to find out whether two nodes in the network are in communication range using UPIs.
@@ -158,7 +158,7 @@ class WirelessTopologyModule(wishful_controller.ControllerModule):
 
         return res
 
-    @wishful_controller.bind_function(upis.global_upi.is_in_communication_range)
+    @wishful_controller.bind_function(upis.net_func.is_in_communication_range)
     def is_in_communication_range(self, node1, node2, mon_dev, **kwargs):
 
         """
