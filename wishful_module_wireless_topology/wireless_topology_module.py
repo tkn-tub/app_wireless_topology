@@ -14,7 +14,7 @@ __email__ = "{gawlowicz, zubow}@tkn.tu-berlin.de"
 
 
 @wishful_controller.build_module
-class WirelessTopologyModule(wishful_controller.ControllerUpiModule):
+class WirelessTopologyModule(wishful_controller.ControllerModule):
     def __init__(self, controller):
         super(WirelessTopologyModule, self).__init__(controller)
         self.log = logging.getLogger('wireless_topology_module.main')
