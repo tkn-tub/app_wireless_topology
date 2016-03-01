@@ -95,7 +95,7 @@ class WirelessTopologyModule(wishful_controller.ControllerModule):
                     isInCs['res'] = False
 
         try:
-            self.log.debug('(2) single flow at %s' % str(node1))
+            self.log.debug('(1) single flow at %s' % str(node1))
             rv = self.controller.nodes(node1).blocking(True).net.gen_layer2_traffic(mon_dev, 1000, None, 12, ipPayloadSize=1350, ipdst="1.1.1.1", ipsrc="2.2.2.2", use_tcpreplay=True)
 
             peer_node = node1
@@ -103,7 +103,7 @@ class WirelessTopologyModule(wishful_controller.ControllerModule):
 
             time.sleep(1)
 
-            self.log.debug('(3) single flow at %s' % str(node2))
+            self.log.debug('(2) single flow at %s' % str(node2))
             rv = self.controller.nodes(node2).blocking(True).net.gen_layer2_traffic(mon_dev, 1000, None, 12, ipPayloadSize=1350, ipdst="1.1.1.1", ipsrc="2.2.2.2", use_tcpreplay=True)
 
             peer_node = node2
@@ -113,7 +113,7 @@ class WirelessTopologyModule(wishful_controller.ControllerModule):
 
             time.sleep(1)
 
-            self.log.debug('(4) two flows at same time %s' % str(nodes))
+            self.log.debug('(3) two flows at same time %s' % str(nodes))
             exec_time = datetime.datetime.now() + datetime.timedelta(seconds=3)
             rv = self.controller.exec_time(exec_time).callback(csResultCollector).node(nodes).net.gen_backlogged_layer2_traffic(mon_dev, 1000, 1350, 12, ipdst="1.1.1.1", ipsrc="2.2.2.2", use_tcpreplay=True)
 
