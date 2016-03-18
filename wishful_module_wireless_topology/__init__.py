@@ -1,1 +1,1 @@
-from wireless_topology_module import *
+from .wireless_topology_module import *

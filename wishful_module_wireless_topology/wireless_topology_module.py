@@ -36,7 +36,7 @@ class WirelessTopologyModule(wishful_module.ControllerModule):
             return None
 
         res = []
-        nodeIds = range(0, len(nodes))
+        nodeIds = list(range(0, len(nodes)))
         groups = itertools.combinations(nodeIds, 2)
         for subgroup in groups:
             #print(subgroup)
@@ -143,7 +143,7 @@ class WirelessTopologyModule(wishful_module.ControllerModule):
             return None
 
         res = []
-        nodeIds = range(0, len(nodes))
+        nodeIds = list(range(0, len(nodes)))
         groups = itertools.combinations(nodeIds, 2)
         for subgroup in groups:
             #print(subgroup)
