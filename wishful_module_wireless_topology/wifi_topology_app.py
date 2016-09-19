@@ -1,7 +1,6 @@
 import logging
-import wishful_framework as wishful_module
+from wishful_agent.core import wishful_module
 import wishful_upis as upis
-from wishful_framework.classes import exceptions
 import itertools
 import time
 import datetime
@@ -39,11 +38,8 @@ class WifiTopologyModule(wishful_module.ControllerModule):
     def add_node(self, event):
         node = event.node
 
-        if self.mode == "GLOBAL" and node.local:
-            return
-
-        self.log.info("Added new node: {}, Local: {}"
-                      .format(node.uuid, node.local))
+        self.log.info("Added new node: {}"
+                      .format(node.uuid))
         self.nodes[node.uuid] = node
 
 
@@ -55,8 +51,8 @@ class WifiTopologyModule(wishful_module.ControllerModule):
         reason = event.reason
         if node.uuid in self.nodes:
             del self.nodes[node.uuid]
-            self.log.info("Node: {}, Local: {} removed reason: {}"
-                          .format(node.uuid, node.local, reason))
+            self.log.info("Node: {}, removed reason: {}"
+                          .format(node.uuid, reason))
 
 
     @wishful_module.on_event(upis.wifi.WiFiGetServingAPRequestEvent)
@@ -68,26 +64,25 @@ class WifiTopologyModule(wishful_module.ControllerModule):
         sta_mac_addr = event.sta_mac_addr
         wifi_intf = event.wifi_intf
 
-        self.log.debug('Function: is_associated_with')
+        self.log.info('Function: handle NetFunc event: WiFiGetServingAPRequestEvent')
 
         try:
             nodes_with_sta = {}
 
             for node_uuid, node in self.nodes.items():
-                res = node.iface(wifi_intf).blocking(
-                    True).radio.get_inactivity_time_of_connected_devices()
+                res = node.blocking(True).net.get_inactivity_time_of_connected_devices()
 
+                self.log.info(str(res))
                 if sta_mac_addr in res:
                     self.log.debug(res[sta_mac_addr])
                     nodes_with_sta[node_uuid] = int(res[sta_mac_addr][0])
 
                     # dictionary of aps where station is associated
-                    self.log.debug("STA found on the following APs with the following idle times:")
-                    self.log.debug(str(nodes_with_sta))
+                    self.log.info("STA found on the following APs with the following idle times:")
 
             if not bool(nodes_with_sta):
                 # If no serving AP was found; send None in reply event
-                reply_event = upis.net_func.WiFiGetServingAPReplyEvent(sta_mac_addr, wifi_intf, None)
+                reply_event = upis.wifi.WiFiGetServingAPReplyEvent(sta_mac_addr, wifi_intf, None)
                 self.send_event(reply_event)
                 return
 
