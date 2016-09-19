@@ -18,7 +18,7 @@ __email__ = "{gawlowicz, zubow}@tkn.tu-berlin.de"
     - estimates nodes in carrier sensing range
 '''
 @wishful_module.build_module
-class WifiTopologyModule(wishful_module.AgentModule):
+class WifiTopologyModule(wishful_module.ControllerModule):
     def __init__(self):
         super().__init__()
         self.log = logging.getLogger('WifiTopologyModule')
