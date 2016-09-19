@@ -90,7 +90,7 @@ class WifiTopologyModule(wishful_module.ControllerModule):
             servingAP = min(nodes_with_sta, key=nodes_with_sta.get)
             self.log.info("STA %s is served by AP %s " % (sta_mac_addr, servingAP))
 
-            reply_event = upis.net_func.WiFiGetServingAPReplyEvent(sta_mac_addr, wifi_intf, servingAP)
+            reply_event = upis.wifi.WiFiGetServingAPReplyEvent(sta_mac_addr, wifi_intf, servingAP)
             self.send_event(reply_event)
             return
 
@@ -225,7 +225,7 @@ class WifiTopologyModule(wishful_module.ControllerModule):
             return
 
         # send reply event
-        reply_event = upis.net_func.WiFiTestTwoNodesInCSRangeReplyEvent(node1.uuid, node2.uuid, mon_dev, TAU, isInCs['res'])
+        reply_event = upis.wifi.WiFiTestTwoNodesInCSRangeReplyEvent(node1.uuid, node2.uuid, mon_dev, TAU, isInCs['res'])
         self.send_event(reply_event)
 
 
@@ -340,5 +340,5 @@ class WifiTopologyModule(wishful_module.ControllerModule):
             isInCommRange = True
 
         # send reply event
-        reply_event = upis.net_func.WiFiTestTwoNodesInCSRangeReplyEvent(node1.uuid, node2.uuid, mon_dev, MINPDR, isInCommRange)
+        reply_event = upis.wifi.WiFiTestTwoNodesInCSRangeReplyEvent(node1.uuid, node2.uuid, mon_dev, MINPDR, isInCommRange)
         self.send_event(reply_event)
