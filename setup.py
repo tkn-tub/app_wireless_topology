@@ -13,7 +13,7 @@ setup(
     author='Piotr Gawlowicz, Anatolij Zubow',
     author_email='{gawlowicz, zubow}@tu-berlin.de',
     description='WiSHFUL Wireless Topology Module',
-    long_description='WiSHFUL Wireless Topology Module',
+    long_description='Used to discover the wireless topology like nodes in reception range, ...',
     keywords='wireless control',
     install_requires=[]
 )
