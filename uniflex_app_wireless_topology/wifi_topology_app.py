@@ -1,7 +1,7 @@
 import logging
-from wishful_agent.core import wishful_module
-from wishful_agent.core import events
 import wishful_upis as upis
+from uniflex.core import modules
+from uniflex.core import events
 import itertools
 import time
 import datetime
@@ -17,25 +17,27 @@ __email__ = "{gawlowicz, zubow}@tkn.tu-berlin.de"
     - estimates nodes in reception range,
     - estimates nodes in carrier sensing range
 '''
-@wishful_module.build_module
-class WifiTopologyModule(wishful_module.ControllerModule):
+
+
+@modules.build_module
+class WifiTopologyModule(modules.ControllerModule):
     def __init__(self):
         super().__init__()
         self.log = logging.getLogger('WifiTopologyModule')
         self.nodes = {}
 
-    @wishful_module.on_start()
+    @modules.on_start()
     def start_wifi_stats_module(self):
         self.log.debug("Start wifi topo module".format())
         self.running = True
 
-    @wishful_module.on_exit()
+    @modules.on_exit()
     def stop_wifi_stats_module(self):
         self.log.debug("Stop wifi topo module".format())
         self.running = False
 
 
-    @wishful_module.on_event(events.NewNodeEvent)
+    @modules.on_event(events.NewNodeEvent)
     def add_node(self, event):
         node = event.node
 
@@ -44,8 +46,8 @@ class WifiTopologyModule(wishful_module.ControllerModule):
         self.nodes[node.uuid] = node
 
 
-    @wishful_module.on_event(events.NodeExitEvent)
-    @wishful_module.on_event(events.NodeLostEvent)
+    @modules.on_event(events.NodeExitEvent)
+    @modules.on_event(events.NodeLostEvent)
     def remove_node(self, event):
         self.log.info("Node lost".format())
         node = event.node
@@ -56,7 +58,7 @@ class WifiTopologyModule(wishful_module.ControllerModule):
                           .format(node.uuid, reason))
 
 
-    @wishful_module.on_event(upis.wifi.WiFiGetServingAPRequestEvent)
+    @modules.on_event(upis.wifi.WiFiGetServingAPRequestEvent)
     def get_AP_the_client_is_associated_with(self, event):
         """
         Estimates the AP which serves the given STA. Note: if an STA is associated with multiple APs the one with the
@@ -100,7 +102,7 @@ class WifiTopologyModule(wishful_module.ControllerModule):
             raise e
 
 
-    @wishful_module.on_event(upis.wifi.WiFiGetNodesInCSRangeRequestEvent)
+    @modules.on_event(upis.wifi.WiFiGetNodesInCSRangeRequestEvent)
     def estimate_nodes_in_carrier_sensing_range(self, event):
         """
         Test to find out whether two nodes in the network are in carrier sensing range using UPIs.
@@ -134,7 +136,7 @@ class WifiTopologyModule(wishful_module.ControllerModule):
             isInCs = self.helper_test_two_node_in_carrier_sensing_range(node1, node2, mon_dev, TAU)
 
 
-    @wishful_module.on_event(upis.wifi.WiFiTestTwoNodesInCSRangeRequestEvent)
+    @modules.on_event(upis.wifi.WiFiTestTwoNodesInCSRangeRequestEvent)
     def test_two_node_in_carrier_sensing_range(self, event):
         """
         Find out whether two nodes are in carrier sensing range or not.
@@ -231,7 +233,7 @@ class WifiTopologyModule(wishful_module.ControllerModule):
 
 
 
-    @wishful_module.on_event(upis.wifi.WiFiGetNodesInCommRangeRequestEvent)
+    @modules.on_event(upis.wifi.WiFiGetNodesInCommRangeRequestEvent)
     def estimate_nodes_in_communication_range(self, event):
         """
         Test to find out whether two nodes in the network are in communication range using UPIs.
@@ -268,7 +270,7 @@ class WifiTopologyModule(wishful_module.ControllerModule):
 
         return res
 
-    @wishful_module.on_event(upis.wifi.WiFiTestTwoNodesInCommRangeRequestEvent)
+    @modules.on_event(upis.wifi.WiFiTestTwoNodesInCommRangeRequestEvent)
     def test_two_node_in_carrier_sensing_range(self, event):
         """
         Find out whether two nodes are in communication range or not.
@@ -283,9 +285,7 @@ class WifiTopologyModule(wishful_module.ControllerModule):
 
         self.helper_test_two_nodes_in_communication_range(node1, node2, mon_dev, MINPDR)
 
-
     def helper_test_two_nodes_in_communication_range(self, node1, node2, mon_dev, MINPDR):
-
         """
         Helper functions to find out whether two nodes are in communication range using UPIs.
         @return True if nodes are in communication range

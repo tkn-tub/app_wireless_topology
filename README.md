@@ -1,9 +1,7 @@
-WiSHFUL Wireless Topology Module
+UniFlex Wireless Topology Module
 ============================
 
-This is a prototypic implementation of a wireless agent providing the Unified
-Programming Interfaces (UPIs) of the Wishful software platform for
-radio and network control.
+Control Application for UniFlex framework that monitors Wireless Topology.
 
 ## Acknowledgement
 
