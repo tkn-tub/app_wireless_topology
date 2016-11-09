@@ -19,8 +19,7 @@ __email__ = "{gawlowicz, zubow}@tkn.tu-berlin.de"
 '''
 
 
-@modules.build_module
-class WifiTopologyModule(modules.ControllerModule):
+class WifiTopologyModule(modules.ControlApplication):
     def __init__(self):
         super().__init__()
         self.log = logging.getLogger('WifiTopologyModule')
