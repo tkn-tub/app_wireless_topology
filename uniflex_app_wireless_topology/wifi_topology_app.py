@@ -35,7 +35,6 @@ class WifiTopologyModule(modules.ControlApplication):
         self.log.debug("Stop wifi topo module".format())
         self.running = False
 
-
     @modules.on_event(events.NewNodeEvent)
     def add_node(self, event):
         node = event.node
@@ -43,7 +42,6 @@ class WifiTopologyModule(modules.ControlApplication):
         self.log.info("Added new node: {}"
                       .format(node.uuid))
         self.nodes[node.uuid] = node
-
 
     @modules.on_event(events.NodeExitEvent)
     @modules.on_event(events.NodeLostEvent)
@@ -56,11 +54,11 @@ class WifiTopologyModule(modules.ControlApplication):
             self.log.info("Node: {}, removed reason: {}"
                           .format(node.uuid, reason))
 
-
     @modules.on_event(upis.wifi.WiFiGetServingAPRequestEvent)
     def get_AP_the_client_is_associated_with(self, event):
         """
-        Estimates the AP which serves the given STA. Note: if an STA is associated with multiple APs the one with the
+        Estimates the AP which serves the given STA.
+        Note: if an STA is associated with multiple APs the one with the
         smallest inactivity time is returned.
         """
         sta_mac_addr = event.sta_mac_addr
@@ -104,10 +102,13 @@ class WifiTopologyModule(modules.ControlApplication):
     @modules.on_event(upis.wifi.WiFiGetNodesInCSRangeRequestEvent)
     def estimate_nodes_in_carrier_sensing_range(self, event):
         """
-        Test to find out whether two nodes in the network are in carrier sensing range using UPIs.
-        For a network with N nodes all combinations are evaluated, i.e. N over 2.
+        Test to find out whether two nodes in the network
+        are in carrier sensing range using UPIs.
+        For a network with N nodes all combinations
+        are evaluated, i.e. N over 2.
         Note: make sure ptpd is running: sudo /etc/init.d/ptp-daemon
-        @return a list of triples (node1, node2, True/False) True/False if nodes are in carrier sensing range
+        @return a list of triples (node1, node2, True/False)
+                True/False if nodes are in carrier sensing range
         """
 
         nodes = list(self.nodes.keys())
@@ -123,7 +124,7 @@ class WifiTopologyModule(modules.ControlApplication):
         nodeIds = list(range(0, len(nodes)))
         groups = itertools.combinations(nodeIds, 2)
         for subgroup in groups:
-            #print(subgroup)
+            # print(subgroup)
             # testing scenario
             node1_uuid = nodes[subgroup[0]]
             node2_uuid = nodes[subgroup[1]]
@@ -229,8 +230,6 @@ class WifiTopologyModule(modules.ControlApplication):
         # send reply event
         reply_event = upis.wifi.WiFiTestTwoNodesInCSRangeReplyEvent(node1.uuid, node2.uuid, mon_dev, TAU, isInCs['res'])
         self.send_event(reply_event)
-
-
 
     @modules.on_event(upis.wifi.WiFiGetNodesInCommRangeRequestEvent)
     def estimate_nodes_in_communication_range(self, event):
