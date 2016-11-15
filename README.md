@@ -3,6 +3,9 @@ UniFlex Wireless Topology Module
 
 Control Application for UniFlex framework that monitors Wireless Topology.
 
+## Installation:
+To install UniFlex framework with all available modules, please go through all steps in [manifest](https://github.com/uniflex/manifests) repository.
+
 ## Acknowledgement
 
 The research leading to these results has received funding from the European
